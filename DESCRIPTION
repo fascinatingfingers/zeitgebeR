@@ -1,0 +1,15 @@
+Package: zeitgebeR
+Type: Package
+Title: Machine Learning Enhancements for Philips Hue Lighting
+Version: 0.1.0
+Author: Justin Brantley <fascinatingfingers@icloud.com>
+Maintainer: Justin Brantley <fascinatingfingers@icloud.com>
+URL: https://github.com/fascinatingfingers/zeitgebeR
+Description: This package contains functions to create a machine learning model
+  for the Philips Hue lighting ecosystem that learns nuanced preferences and
+  gently adjusts lighting throughout the day. See the README at
+  <https://github.com/fascinatingfingers/zeitgebeR/README.md>.
+License: GPL-3
+LazyData: true
+Imports: PhilipsHue, DarkSky
+RoxygenNote: 6.0.1
