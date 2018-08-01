@@ -33,7 +33,7 @@ record_weather <- function(cache_timeout = 15) {
     last_update_time <- dir(getOption('zeitgeber')$darksky_storage_path)
     last_update_time <- sub('^(\\d{14}).*$', '\\1', last_update_time)
     last_update_time <- as.POSIXct(last_update_time, format = '%Y%m%d%H%M%S')
-    last_update_time <- max(last_update_time)
+    last_update_time <- if (length(last_update_time) == 0) {NA} else {max(last_update_time)}
 
     needs_update <- (
         is.na(last_update_time) ||
