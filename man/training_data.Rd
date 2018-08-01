@@ -5,6 +5,8 @@
 \alias{record_hue_state}
 \alias{record_weather}
 \alias{record_data}
+\alias{parse_state}
+\alias{parse_weather}
 \title{Functions to record and manipulate training data}
 \usage{
 record_hue_state()
@@ -12,10 +14,17 @@ record_hue_state()
 record_weather(cache_timeout = 15)
 
 record_data(cache_timeout = 15)
+
+parse_state(path)
+
+parse_weather(path)
 }
 \arguments{
 \item{cache_timeout}{time (in minutes) to cache results before hitting the
 API again}
+
+\item{path}{path to file, typically a file created by
+\code{\link{record_hue_state}} or \code{\link{record_weather}}}
 }
 \value{
 Returns `invisible(TRUE)` upon success.

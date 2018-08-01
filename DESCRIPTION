@@ -11,5 +11,5 @@ Description: This package contains functions to create a machine learning model
   <https://github.com/fascinatingfingers/zeitgebeR/README.md>.
 License: GPL-3
 LazyData: true
-Imports: yaml, digest, dplyr, lubridate, PhilipsHue, DarkSky, maptools
+Imports: yaml, digest, dplyr, lubridate, purrr, PhilipsHue, DarkSky, maptools
 RoxygenNote: 6.0.1
