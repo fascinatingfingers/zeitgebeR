@@ -60,5 +60,5 @@ record_weather <- function(cache_timeout = 15) {
 #' @rdname training_data
 #' @export
 record_data <- function(cache_timeout = 15) {
-    all(record_hue_state(), record_weather(cache_timeout))
+    return(invisible(all(record_hue_state(), record_weather(cache_timeout))))
 }
