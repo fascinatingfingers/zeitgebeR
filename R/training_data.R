@@ -68,7 +68,7 @@ record_data <- function(cache_timeout = 15) {
 #' @rdname training_data
 #' @export
 parse_state <- function(path) {
-    x <- yaml::yaml.load_file(path)
+    x <- suppressWarnings(yaml::yaml.load_file(path))
 
     # Create room_name/light_id lookup table
     rooms <- purrr::keep(x$groups, ~ .$type %in% 'Room')
@@ -161,7 +161,7 @@ parse_state <- function(path) {
 #' @rdname training_data
 #' @export
 parse_weather <- function(path) {
-    x <- yaml::yaml.load_file(path)
+    x <- suppressWarnings(yaml::yaml.load_file(path))
 
     dplyr::data_frame(
         datetime = as.POSIXct(x$currently$time, origin = '1970-01-01'),
