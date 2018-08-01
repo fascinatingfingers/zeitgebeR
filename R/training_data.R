@@ -5,6 +5,7 @@
 #'   API again
 #' @param path path to file, typically a file created by
 #'   \code{\link{record_hue_state}} or \code{\link{record_weather}}
+#' @param limit sets a cap on the number of files to be processed at a time
 #'
 #' @return Returns `invisible(TRUE)` upon success.
 #'
@@ -168,4 +169,70 @@ parse_weather <- function(path) {
         visibility = as.numeric(x$currently$visibility),
         cloud_cover = as.numeric(x$currently$cloudCover)
     )
+}
+
+#' @rdname training_data
+#' @export
+archive_data <- function(limit = 100) {
+
+    # state
+    message('Archiving state...')
+
+    files <- dir(
+        getOption('zeitgeber')$hue_storage_path,
+        pattern = '^(\\d{14})_\\w+_state.yaml$',
+        full.names = TRUE
+    )
+
+    if (limit > 0 && length(files) > limit) {files <- utils::head(files, limit)}
+
+    rds_file <- file.path(getOption('zeitgeber')$hue_storage_path, 'state.rds')
+    zip_file <- file.path(getOption('zeitgeber')$hue_storage_path, 'archive.zip')
+
+    state <- dplyr::bind_rows(purrr::map(files, parse_state))
+
+    if (file.exists(rds_file)) {
+        archive <- readRDS(rds_file)
+        archive <- dplyr::mutate_if(archive, is.factor, as.character)
+        state <- dplyr::bind_rows(archive, state)
+        rm(archive)
+    }
+
+    state <- dplyr::mutate_if(state, is.character, as.factor)
+
+    saveRDS(state, rds_file)
+    utils::zip(zip_file, files, flags = '-r9XmD')
+    rm(files, rds_file, zip_file, state)
+
+    # weather
+    message('Archiving weather...')
+
+    files <- dir(
+        getOption('zeitgeber')$darksky_storage_path,
+        pattern = '^(\\d{14})_\\w+_weather.yaml$',
+        full.names = TRUE
+    )
+
+    if (limit > 0 && length(files) > limit) {files <- utils::head(files, limit)}
+
+    rds_file <- file.path(getOption('zeitgeber')$darksky_storage_path, 'weather.rds')
+    zip_file <- file.path(getOption('zeitgeber')$darksky_storage_path, 'archive.zip')
+
+    weather <- dplyr::bind_rows(purrr::map(files, parse_weather))
+
+    if (file.exists(rds_file)) {
+        archive <- readRDS(rds_file)
+        archive <- dplyr::mutate_if(archive, is.factor, as.character)
+        weather <- dplyr::bind_rows(archive, weather)
+        rm(archive)
+    }
+
+    weather <- dplyr::mutate_if(weather, is.character, as.factor)
+
+    saveRDS(weather, rds_file)
+    utils::zip(zip_file, files, flags = '-r9XmD')
+    rm(files, rds_file, zip_file, weather)
+
+    # fin!
+    return(invisible(TRUE))
 }

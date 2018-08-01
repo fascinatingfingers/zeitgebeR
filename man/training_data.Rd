@@ -7,6 +7,7 @@
 \alias{record_data}
 \alias{parse_state}
 \alias{parse_weather}
+\alias{archive_data}
 \title{Functions to record and manipulate training data}
 \usage{
 record_hue_state()
@@ -18,6 +19,8 @@ record_data(cache_timeout = 15)
 parse_state(path)
 
 parse_weather(path)
+
+archive_data(limit = 100)
 }
 \arguments{
 \item{cache_timeout}{time (in minutes) to cache results before hitting the
@@ -25,6 +28,8 @@ API again}
 
 \item{path}{path to file, typically a file created by
 \code{\link{record_hue_state}} or \code{\link{record_weather}}}
+
+\item{limit}{sets a cap on the number of files to be processed at a time}
 }
 \value{
 Returns `invisible(TRUE)` upon success.
