@@ -81,6 +81,8 @@ parse_state <- function(path) {
         )
     ))
 
+    if (nrow(rooms) == 0) {return(NULL)}
+
     # Get light states
     lights <- dplyr::bind_rows(purrr::map2(
         names(x$lights),
@@ -97,6 +99,8 @@ parse_state <- function(path) {
         )
     ))
 
+    if (nrow(rooms) == 0) {return(NULL)}
+
     # Get scenes, filter out multi-room scenes
     scenes <- dplyr::bind_rows(purrr::map(
         x$scenes,
@@ -108,45 +112,57 @@ parse_state <- function(path) {
             return(dplyr::tbl_df(y))
         }
     ))
-    scenes <- dplyr::left_join(scenes, rooms, by = 'light_id')
-    scenes <- split(scenes, scenes$scene_name)
-    scenes <- purrr::keep(scenes, ~ length(unique(.$room_name)) == 1)
-    scenes <- dplyr::bind_rows(scenes)
 
-    # Deduce whether current state matches a scene
-    scene_matches <- dplyr::left_join(
-        scenes, lights,
-        by = c('room_name', 'light_id'),
-        suffix = c('.scene', '.actual')
-    )
-    scene_matches <- scene_matches[
-        scene_matches$reachable %in% TRUE &
-        scene_matches$on.scene %in% TRUE &
-        scene_matches$on.actual %in% TRUE,
-    ]
+    if (nrow(scenes) > 0) {
+        scenes <- dplyr::left_join(scenes, rooms, by = 'light_id')
+        scenes <- split(scenes, scenes$scene_name)
+        scenes <- purrr::keep(scenes, ~ length(unique(.$room_name)) == 1)
+        scenes <- dplyr::bind_rows(scenes)
+    }
 
-    scene_matches <- split(
-        scene_matches,
-        with(scene_matches, list(room_name, scene_name)),
-        drop = TRUE
-    )
-    scene_matches <- dplyr::bind_rows(purrr::map(scene_matches, function(x) {
-        bri.diff <- x$bri.actual - x$bri.scene
-        ct.diff <- x$ct.actual - x$ct.scene
-        x$scene_rmse <- sqrt(mean(c(bri.diff^2, ct.diff^2), na.rm = TRUE))
+    if (nrow(scenes) > 0) {
+        # Deduce whether current state matches a scene
+        scene_matches <- dplyr::left_join(
+            scenes, lights,
+            by = c('room_name', 'light_id'),
+            suffix = c('.scene', '.actual')
+        )
+        scene_matches <- scene_matches[
+            scene_matches$reachable %in% TRUE &
+            scene_matches$on.scene %in% TRUE &
+            scene_matches$on.actual %in% TRUE,
+        ]
 
-        return(x)
-    }))
+        scene_matches <- split(
+            scene_matches,
+            with(scene_matches, list(room_name, scene_name)),
+            drop = TRUE
+        )
+        scene_matches <- dplyr::bind_rows(purrr::map(scene_matches, function(x) {
+            bri.diff <- x$bri.actual - x$bri.scene
+            ct.diff <- x$ct.actual - x$ct.scene
+            x$scene_rmse <- sqrt(mean(c(bri.diff^2, ct.diff^2), na.rm = TRUE))
 
-    scene_matches <- split(scene_matches, scene_matches$room_name)
-    scene_matches <- dplyr::bind_rows(purrr::map(scene_matches, function(x) {
-        x[x$scene_rmse == min(x$scene_rmse), ]
-    }))
+            return(x)
+        }))
+    }
 
-    scene_matches <- scene_matches[, c('room_name', 'light_id', 'scene_name', 'scene_rmse')]
+    if (exists('scene_matches') && nrow(scene_matches) > 0) {
+        scene_matches <- split(scene_matches, scene_matches$room_name)
+        scene_matches <- dplyr::bind_rows(purrr::map(scene_matches, function(x) {
+            x[x$scene_rmse == min(x$scene_rmse), ]
+        }))
+
+        scene_matches <- scene_matches[, c('room_name', 'light_id', 'scene_name', 'scene_rmse')]
+
+        y <- dplyr::left_join(lights, scene_matches, by = c('room_name', 'light_id'))
+    } else {
+        y <- lights
+        y$scene_name = NA
+        y$scene_rmse = NA
+    }
 
     # Prepare return table
-    y <- dplyr::left_join(lights, scene_matches, by = c('room_name', 'light_id'))
     y$datetime <- as.POSIXct(x$config$localtime, tz = x$config$timezone, format = '%Y-%m-%dT%H:%M:%S')
     y <- y[, c(
         'datetime',
