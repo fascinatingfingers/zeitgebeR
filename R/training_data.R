@@ -252,3 +252,70 @@ archive_data <- function(limit = 100) {
     # fin!
     return(invisible(TRUE))
 }
+
+
+training_data <- function() {
+    state_path <- file.path(getOption('zeitgeber')$hue_storage_path, 'state.rds')
+    weather_path <- file.path(getOption('zeitgeber')$darksky_storage_path, 'weather.rds')
+
+    if (!file.exists(state_path) | !file.exists(weather_path)) {
+        stop('Create training data with `record_data()`, then call `archive_data()`')
+    }
+
+    state <- readRDS(state_path)
+    weather <- readRDS(weather_path)
+    rm(state_path, weather_path)
+
+    # Initialize return dataset
+    y <- state[
+        !is.na(state$datetime) &
+        state$reachable %in% TRUE & state$on %in% TRUE &
+        !is.na(state$bri) & !is.na(state$ct),
+    ]
+
+    # Join weather
+    w <- dplyr::data_frame(datetime = unique(y$datetime))
+    i <- purrr::map_int(w$datetime, ~ which.min(abs(. - weather$datetime)))
+    w$visibility <- weather$visibility[i]
+    w$cloud_cover <- weather$cloud_cover[i]
+    y <- dplyr::left_join(y, w, by = 'datetime')
+    rm(state, weather, w, i)
+
+    # Update room, role, and group
+    re <- '^(.+)/(Ambient|Accent|Task)/(.+)$'
+    lights <- PhilipsHue::get_lights()
+    lights <- dplyr::bind_rows(purrr::map(
+        lights,
+        ~ dplyr::data_frame(light_unique_id = .$uniqueid, light_name = .$name)
+    ))
+    lights$room <- sub(re, '\\1', lights$light_name)
+    lights$role <- sub(re, '\\2', lights$light_name)
+    lights$group <- sub(' ?\\d+', '', sub(re, '\\3', lights$light_name))
+    lights$room <- factor(lights$room, levels = names(sort(table(lights$room), decreasing = TRUE)))
+    lights$role <- factor(lights$role, levels = c('Ambient', 'Accent', 'Task'))
+    lights$group <- factor(lights$group, levels = names(sort(table(lights$group), decreasing = TRUE)))
+    lights$light_unique_id <- factor(lights$light_unique_id, levels = levels(y$light_unique_id))
+    lights$light_name <- factor(lights$light_name)
+    y <- y[, setdiff(names(y), c('room_name', 'light_name', 'reachable', 'on'))]
+    y <- dplyr::left_join(y, lights, by = 'light_unique_id')
+    rm(re, lights)
+
+    # Hash light states by room (to identify 'runs')
+    y <- split(y, list(y$room, y$datetime), drop = TRUE)
+    y <- dplyr::bind_rows(purrr::map(y, function(x) {
+        y <- x[, c('light_unique_id', 'bri', 'ct')]
+        y <- y[order(y$light_unique_id), ]
+        x$state_hash = digest::digest(y)
+        return(x)
+    }))
+    y$state_hash <- factor(y$state_hash)
+
+    # Add zeitgeber
+    y <- left_join(y, zeitgeber(unique(y$datetime)), by = 'datetime')
+
+    # Flag states set to Default
+    y$default_state <- (
+        grepl('Default', y$scene_name, ignore.case = TRUE) %in% TRUE &
+        (y$scene_rmse <= 17) %in% TRUE
+    )
+}
