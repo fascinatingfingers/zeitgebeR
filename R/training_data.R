@@ -339,13 +339,13 @@ training_data <- function() {
     y$weight <- (
 
         # Decay all observations (half-life: 4 years)
-        (0.5 ^ (as.numeric(difftime(Sys.time(), y$datetime, units = 'days')) / (4 * 365.2422))) *
+        (0.5 ^ (as.numeric(difftime(max(y$datetime), y$datetime, units = 'days')) / (4 * 365.2422))) *
 
-        # Further decay observations that match default scene (half-life: 1 week)
-        (0.5 ^ (y$default_scene * as.numeric(difftime(Sys.time(), y$datetime, units = 'weeks')) / (1))) *
+        # Further decay observations that match default scene (half-life: 4 weeks)
+        (0.5 ^ (y$default_scene * as.numeric(difftime(Sys.time(), y$datetime, units = 'weeks')) / (5))) *
 
         # Further decay sustained observations (half-life: 30 minutes)
-        (0.5 ^ (as.numeric(difftime(y$datetime, min(y$datetime), units = 'mins')) / (30)))
+        (0.5 ^ (y$time_in_state / (30)))
     )
     y <- y[, setdiff(names(y), c('default_scene', 'time_in_state'))]
 
