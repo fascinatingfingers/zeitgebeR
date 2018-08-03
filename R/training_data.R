@@ -253,8 +253,11 @@ archive_data <- function(limit = 100) {
     return(invisible(TRUE))
 }
 
-
+#' @rdname training_data
+#' @export
 training_data <- function() {
+
+    # Load source data
     state_path <- file.path(getOption('zeitgeber')$hue_storage_path, 'state.rds')
     weather_path <- file.path(getOption('zeitgeber')$darksky_storage_path, 'weather.rds')
 
@@ -264,58 +267,88 @@ training_data <- function() {
 
     state <- readRDS(state_path)
     weather <- readRDS(weather_path)
+
     rm(state_path, weather_path)
 
     # Initialize return dataset
-    y <- state[
-        !is.na(state$datetime) &
-        state$reachable %in% TRUE & state$on %in% TRUE &
-        !is.na(state$bri) & !is.na(state$ct),
-    ]
-
-    # Join weather
-    w <- dplyr::data_frame(datetime = unique(y$datetime))
-    i <- purrr::map_int(w$datetime, ~ which.min(abs(. - weather$datetime)))
-    w$visibility <- weather$visibility[i]
-    w$cloud_cover <- weather$cloud_cover[i]
-    y <- dplyr::left_join(y, w, by = 'datetime')
-    rm(state, weather, w, i)
+    y <- state
 
     # Update room, role, and group
     re <- '^(.+)/(Ambient|Accent|Task)/(.+)$'
     lights <- PhilipsHue::get_lights()
-    lights <- dplyr::bind_rows(purrr::map(
-        lights,
-        ~ dplyr::data_frame(light_unique_id = .$uniqueid, light_name = .$name)
-    ))
-    lights$room <- sub(re, '\\1', lights$light_name)
-    lights$role <- sub(re, '\\2', lights$light_name)
-    lights$group <- sub(' ?\\d+', '', sub(re, '\\3', lights$light_name))
+    lights <- dplyr::bind_rows(purrr::map(lights, ~
+        dplyr::data_frame(light_unique_id = .$uniqueid, name = .$name)))
+    lights$room <- sub(re, '\\1', lights$name)
+    lights$role <- sub(re, '\\2', lights$name)
+    lights$group <- sub(' ?\\d+', '', sub(re, '\\3', lights$name))
     lights$room <- factor(lights$room, levels = names(sort(table(lights$room), decreasing = TRUE)))
     lights$role <- factor(lights$role, levels = c('Ambient', 'Accent', 'Task'))
     lights$group <- factor(lights$group, levels = names(sort(table(lights$group), decreasing = TRUE)))
     lights$light_unique_id <- factor(lights$light_unique_id, levels = levels(y$light_unique_id))
-    lights$light_name <- factor(lights$light_name)
-    y <- y[, setdiff(names(y), c('room_name', 'light_name', 'reachable', 'on'))]
-    y <- dplyr::left_join(y, lights, by = 'light_unique_id')
+    lights$name <- factor(lights$name)
+    lights <- lights[, c('room', 'role', 'group', 'name', 'light_unique_id')]
+    y <- dplyr::right_join(
+        lights,
+        y[, setdiff(names(y), c('room_name', 'light_name'))],
+        by = 'light_unique_id'
+    )
     rm(re, lights)
 
-    # Hash light states by room (to identify 'runs')
-    y <- split(y, list(y$room, y$datetime), drop = TRUE)
-    y <- dplyr::bind_rows(purrr::map(y, function(x) {
-        y <- x[, c('light_unique_id', 'bri', 'ct')]
-        y <- y[order(y$light_unique_id), ]
-        x$state_hash = digest::digest(y)
-        return(x)
-    }))
-    y$state_hash <- factor(y$state_hash)
-
-    # Add zeitgeber
-    y <- left_join(y, zeitgeber(unique(y$datetime)), by = 'datetime')
-
-    # Flag states set to Default
-    y$default_state <- (
-        grepl('Default', y$scene_name, ignore.case = TRUE) %in% TRUE &
+    # Flag rooms set to default scene; exclude rooms set to non-default scene
+    y$default_scene <- (
+        grepl('default', y$scene_name, ignore.case = TRUE) %in% TRUE &
         (y$scene_rmse <= 17) %in% TRUE
     )
+    y <- y[is.na(y$scene_name) | grepl('default', y$scene_name, ignore.case = TRUE), ]
+
+    # Filter down to lights that were on; deduplicate
+    y <- y[y$reachable %in% TRUE & y$on %in% TRUE, ]
+    y <- dplyr::group_by_at(y, c('room', 'role', 'group', 'name', 'datetime'))
+    y <- dplyr::summarise_at(y, c('bri', 'ct', 'default_scene'), mean, na.rm = TRUE)
+    y <- dplyr::ungroup(y)
+    y <- y[stats::complete.cases(y), ]
+    y$default_scene <- as.logical(y$default_scene)
+    y$bri[y$bri < 1] <- 1; y$bri[y$bri > 254] <- 254
+    y$ct[y$ct < 153] <- 153; y$ct[y$ct > 500] <- 500
+
+    # Add zeitgeber and weather features
+    z <- zeitgeber(unique(y$datetime))
+    z <- z[, setdiff(names(z), c('time_of_day', 'weekend'))]
+    index <- purrr::map_int(z$datetime, ~ which.min(abs(. - weather$datetime)))
+    y <- dplyr::right_join(
+        dplyr::bind_cols(z, weather[index, c('visibility', 'cloud_cover')]),
+        y, by = 'datetime'
+    )
+    rm(z, index)
+
+    # Calculate time in state, by room
+    y <- y[order(y$datetime, y$room, y$role, y$group, y$name), ]
+    y <- split(y, list(y$room, y$datetime), drop = TRUE)
+    y <- dplyr::bind_rows(purrr::map(y, function(x) {
+        x$hash <- digest::digest(cbind(x$bri, x$ct))
+        return(x)
+    }))
+    y <- split(y, list(cumsum(as.numeric((y$hash == dplyr::lag(y$hash)) %in% c(NA, FALSE)))))
+    y <- dplyr::bind_rows(purrr::map(y, function(x) {
+        x$time_in_state <- as.numeric(difftime(x$datetime, min(x$datetime), units = 'mins'))
+        return(x)
+    }))
+    y <- y[, setdiff(names(y), 'hash')]
+
+    # Weight observations
+    y$weight <- (
+
+        # Decay all observations (half-life: 4 years)
+        (0.5 ^ (as.numeric(difftime(Sys.time(), y$datetime, units = 'days')) / (4 * 365.2422))) *
+
+        # Further decay observations that match default scene (half-life: 1 week)
+        (0.5 ^ (y$default_scene * as.numeric(difftime(Sys.time(), y$datetime, units = 'weeks')) / (1))) *
+
+        # Further decay sustained observations (half-life: 30 minutes)
+        (0.5 ^ (as.numeric(difftime(y$datetime, min(y$datetime), units = 'mins')) / (30)))
+    )
+    y <- y[, setdiff(names(y), c('default_scene', 'time_in_state'))]
+
+    # Fin!
+    return(y)
 }

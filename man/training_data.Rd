@@ -8,6 +8,7 @@
 \alias{parse_state}
 \alias{parse_weather}
 \alias{archive_data}
+\alias{training_data}
 \title{Functions to record and manipulate training data}
 \usage{
 record_hue_state()
@@ -21,6 +22,8 @@ parse_state(path)
 parse_weather(path)
 
 archive_data(limit = 100)
+
+training_data()
 }
 \arguments{
 \item{cache_timeout}{time (in minutes) to cache results before hitting the
