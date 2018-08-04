@@ -313,7 +313,6 @@ training_data <- function() {
 
     # Add zeitgeber and weather features
     z <- zeitgeber(unique(y$datetime))
-    z <- z[, setdiff(names(z), c('time_of_day', 'weekend'))]
     index <- purrr::map_int(z$datetime, ~ which.min(abs(. - weather$datetime)))
     y <- dplyr::right_join(
         dplyr::bind_cols(z, weather[index, c('visibility', 'cloud_cover')]),

@@ -29,7 +29,6 @@ zeitgeber <- function(time = Sys.time(), lat = getOption('DarkSky')$lat, lon = g
 
     dplyr::data_frame(
         datetime = time,
-        time_of_day = time_of_day,
         solar_elevation = solar_elevation,
         solar_azimuth = solar_azimuth,
         solar_azimuth_x = cos(solar_azimuth),
@@ -37,7 +36,6 @@ zeitgeber <- function(time = Sys.time(), lat = getOption('DarkSky')$lat, lon = g
         civil_daylight = solar_elevation > -6,
         nautical_daylight = solar_elevation > -12,
         astronomical_daylight = solar_elevation > -18,
-        weekend = weekend,
         working_hours = scale_period(time_of_day - weekend, 09, 18), # TODO parameterize
         awake_hours = scale_period(time_of_day - weekend, 08, 24) # TODO parameterize
     )
