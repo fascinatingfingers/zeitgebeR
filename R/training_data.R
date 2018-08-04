@@ -16,7 +16,7 @@
 record_hue_state <- function() {
     state <- PhilipsHue::get_state()
     path <- file.path(
-        getOption('zeitgeber')$hue_storage_path,
+        getOption('zeitgebeR')$hue_storage_path,
         sprintf(
             '%s_%s_state.yaml',
             format(Sys.time(), '%Y%m%d%H%M%S'),
@@ -33,7 +33,7 @@ record_hue_state <- function() {
 #' @export
 record_weather <- function(cache_timeout = 15) {
 
-    last_update_time <- dir(getOption('zeitgeber')$darksky_storage_path)
+    last_update_time <- dir(getOption('zeitgebeR')$darksky_storage_path)
     last_update_time <- sub('^(\\d{14}).*$', '\\1', last_update_time)
     last_update_time <- as.POSIXct(last_update_time, format = '%Y%m%d%H%M%S')
     last_update_time <- if (length(last_update_time) == 0) {NA} else {max(last_update_time)}
@@ -46,7 +46,7 @@ record_weather <- function(cache_timeout = 15) {
     if (needs_update) {
         weather <- DarkSky::get_forecast()
         path <- file.path(
-            getOption('zeitgeber')$darksky_storage_path,
+            getOption('zeitgebeR')$darksky_storage_path,
             sprintf(
                 '%s_%s_weather.yaml',
                 format(Sys.time(), '%Y%m%d%H%M%S'),
@@ -195,15 +195,15 @@ archive_data <- function(limit = 100) {
     message('Archiving state...')
 
     files <- dir(
-        getOption('zeitgeber')$hue_storage_path,
+        getOption('zeitgebeR')$hue_storage_path,
         pattern = '^(\\d{14})_\\w+_state.yaml$',
         full.names = TRUE
     )
 
     if (limit > 0 && length(files) > limit) {files <- utils::head(files, limit)}
 
-    rds_file <- file.path(getOption('zeitgeber')$hue_storage_path, 'state.rds')
-    zip_file <- file.path(getOption('zeitgeber')$hue_storage_path, 'archive.zip')
+    rds_file <- file.path(getOption('zeitgebeR')$hue_storage_path, 'state.rds')
+    zip_file <- file.path(getOption('zeitgebeR')$hue_storage_path, 'archive.zip')
 
     state <- dplyr::bind_rows(purrr::map(files, parse_state))
 
@@ -224,15 +224,15 @@ archive_data <- function(limit = 100) {
     message('Archiving weather...')
 
     files <- dir(
-        getOption('zeitgeber')$darksky_storage_path,
+        getOption('zeitgebeR')$darksky_storage_path,
         pattern = '^(\\d{14})_\\w+_weather.yaml$',
         full.names = TRUE
     )
 
     if (limit > 0 && length(files) > limit) {files <- utils::head(files, limit)}
 
-    rds_file <- file.path(getOption('zeitgeber')$darksky_storage_path, 'weather.rds')
-    zip_file <- file.path(getOption('zeitgeber')$darksky_storage_path, 'archive.zip')
+    rds_file <- file.path(getOption('zeitgebeR')$darksky_storage_path, 'weather.rds')
+    zip_file <- file.path(getOption('zeitgebeR')$darksky_storage_path, 'archive.zip')
 
     weather <- dplyr::bind_rows(purrr::map(files, parse_weather))
 
@@ -258,8 +258,8 @@ archive_data <- function(limit = 100) {
 training_data <- function() {
 
     # Load source data
-    state_path <- file.path(getOption('zeitgeber')$hue_storage_path, 'state.rds')
-    weather_path <- file.path(getOption('zeitgeber')$darksky_storage_path, 'weather.rds')
+    state_path <- file.path(getOption('zeitgebeR')$hue_storage_path, 'state.rds')
+    weather_path <- file.path(getOption('zeitgebeR')$darksky_storage_path, 'weather.rds')
 
     if (!file.exists(state_path) | !file.exists(weather_path)) {
         stop('Create training data with `record_data()`, then call `archive_data()`')

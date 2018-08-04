@@ -34,7 +34,7 @@ set_configuration <- function(
     PhilipsHue::set_bridge_credentials(hue_bridge_ip, hue_username)
     DarkSky::set_dark_sky_credentials(darksky_key, lat, lon)
 
-    options(zeitgeber = list(
+    options(zeitgebeR = list(
         hue_storage_path = hue_storage_path,
         darksky_storage_path = darksky_storage_path
     ))
@@ -47,5 +47,5 @@ set_configuration <- function(
 reset_configuration <- function() {
     PhilipsHue::reset_bridge_credentials()
     DarkSky::reset_dark_sky_credentials()
-    options(zeitgeber = list())
+    options(zeitgebeR = list())
 }
