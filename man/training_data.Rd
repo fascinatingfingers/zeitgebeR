@@ -2,41 +2,23 @@
 % Please edit documentation in R/training_data.R
 \name{training_data}
 \alias{training_data}
-\alias{record_hue_state}
-\alias{record_weather}
-\alias{record_data}
-\alias{parse_state}
-\alias{parse_weather}
-\alias{archive_data}
-\alias{training_data}
-\title{Functions to record and manipulate training data}
+\title{Prepare training data}
 \usage{
-record_hue_state()
-
-record_weather(cache_timeout = 15)
-
-record_data(cache_timeout = 15)
-
-parse_state(path)
-
-parse_weather(path)
-
-archive_data(limit = 100)
-
-training_data()
+training_data(state, weather)
 }
 \arguments{
-\item{cache_timeout}{time (in minutes) to cache results before hitting the
-API again}
+\item{state}{\code{\link[dplyr]{data_frame}} of Hue state observations,
+typically created by \code{\link{archive_data}}}
 
-\item{path}{path to file, typically a file created by
-\code{\link{record_hue_state}} or \code{\link{record_weather}}}
-
-\item{limit}{sets a cap on the number of files to be processed at a time}
+\item{weather}{\code{\link[dplyr]{data_frame}} of weather observations,
+typically created by \code{\link{archive_data}}}
 }
 \value{
-Returns `invisible(TRUE)` upon success.
+Returns a \code{\link[dplyr]{data_frame}} ready for a call to
+  \code{\link{fit_models}}
 }
 \description{
-Functions to record and manipulate training data
+This function combines historical observations of Hue state and weather
+conditions into a \code{\link[dplyr]{data_frame}} formatted for model
+fitting.
 }

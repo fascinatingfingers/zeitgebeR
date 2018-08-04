@@ -1,35 +1,50 @@
 
-#' Functions to record and manipulate training data
+#' Functions to record and parse source data
 #'
-#' @param cache_timeout time (in minutes) to cache results before hitting the
-#'   API again
-#' @param path path to file, typically a file created by
-#'   \code{\link{record_hue_state}} or \code{\link{record_weather}}
-#' @param limit sets a cap on the number of files to be processed at a time
+#' @param cache_timeout time (in minutes) to reuse cached results before hitting
+#'   the API again
+#' @param x the object to parse, i.e.
+#'   `\code{x = yaml::yaml.load_file(path)}`) where \code{path} is a data file
+#'   saved by \code{\link{record_hue_state}} or \code{\link{record_weather}}
 #'
-#' @return Returns `invisible(TRUE)` upon success.
+#' @return \code{\link{record_hue_state}} and \code{\link{record_weather}}
+#'   return \code{TRUE} (invisibly) upon success. \code{\link{parse_hue_state}}
+#'   and \code{\link{parse_weather}} return a \code{\link[dplyr]{data_frame}}
+#'   of relevant features.
 #'
-#' @name training_data
+#' @name source_data
 
-#' @rdname training_data
+#' @rdname source_data
 #' @export
-record_hue_state <- function() {
-    state <- PhilipsHue::get_state()
-    path <- file.path(
-        getOption('zeitgebeR')$hue_storage_path,
-        sprintf(
-            '%s_%s_state.yaml',
-            format(Sys.time(), '%Y%m%d%H%M%S'),
-            digest::digest(state, algo = 'crc32')
-        )
+record_hue_state <- function(cache_timeout = 0) {
+    last_update_time <- dir(getOption('zeitgebeR')$hue_storage_path)
+    last_update_time <- sub('^(\\d{14}).*$', '\\1', last_update_time)
+    last_update_time <- as.POSIXct(last_update_time, format = '%Y%m%d%H%M%S')
+    last_update_time <- if (length(last_update_time) == 0) {NA} else {max(last_update_time)}
+
+    needs_update <- (
+        is.na(last_update_time) ||
+        difftime(Sys.time(), last_update_time, units = 'mins') > cache_timeout
     )
 
-    write(yaml::as.yaml(state), path)
+    if (needs_update) {
+        state <- PhilipsHue::get_state()
+        path <- file.path(
+            getOption('zeitgebeR')$hue_storage_path,
+            sprintf(
+                '%s_%s_state.yaml',
+                format(Sys.time(), '%Y%m%d%H%M%S'),
+                digest::digest(state, algo = 'crc32')
+            )
+        )
+
+        write(yaml::as.yaml(state), path)
+    }
 
     return(invisible(TRUE))
 }
 
-#' @rdname training_data
+#' @rdname source_data
 #' @export
 record_weather <- function(cache_timeout = 15) {
 
@@ -60,16 +75,9 @@ record_weather <- function(cache_timeout = 15) {
     return(invisible(TRUE))
 }
 
-#' @rdname training_data
+#' @rdname source_data
 #' @export
-record_data <- function(cache_timeout = 15) {
-    return(invisible(all(record_hue_state(), record_weather(cache_timeout))))
-}
-
-#' @rdname training_data
-#' @export
-parse_state <- function(path) {
-    x <- suppressWarnings(yaml::yaml.load_file(path))
+parse_hue_state <- function(x) {
 
     # Create room_name/light_id lookup table
     rooms <- purrr::keep(x$groups, ~ .$type %in% 'Room')
@@ -175,11 +183,9 @@ parse_state <- function(path) {
     return(y)
 }
 
-#' @rdname training_data
+#' @rdname source_data
 #' @export
-parse_weather <- function(path) {
-    x <- suppressWarnings(yaml::yaml.load_file(path))
-
+parse_weather <- function(x) {
     dplyr::data_frame(
         datetime = as.POSIXct(x$currently$time, origin = '1970-01-01'),
         visibility = as.numeric(x$currently$visibility),
@@ -187,7 +193,19 @@ parse_weather <- function(path) {
     )
 }
 
-#' @rdname training_data
+#' Batch process source data
+#'
+#' This function identifies new source data files saved in
+#' \code{getOption('zeitgebeR')$hue_storage_path} and
+#' \code{getOption('zeitgebeR')$darksky_storage_path}. Each file is loaded and
+#' parsed, and the data are appended to an RDS file. It then moves the processed
+#' source files into a zip archive. Upon completion, the storage paths should
+#' contain only an RDS file and a zip archive.
+#'
+#' @param limit sets a cap on the number of files to be processed at a time
+#'
+#' @return Returns \code{TRUE} (invisibly) upon successful completion
+#'
 #' @export
 archive_data <- function(limit = 100) {
 
@@ -205,7 +223,11 @@ archive_data <- function(limit = 100) {
     rds_file <- file.path(getOption('zeitgebeR')$hue_storage_path, 'state.rds')
     zip_file <- file.path(getOption('zeitgebeR')$hue_storage_path, 'archive.zip')
 
-    state <- dplyr::bind_rows(purrr::map(files, parse_state))
+    state <- dplyr::bind_rows(purrr::map(files, function(path) {
+        y <- suppressWarnings(yaml::yaml.load_file(path))
+        y <- parse_hue_state(y)
+        return(y)
+    }))
 
     if (file.exists(rds_file)) {
         archive <- readRDS(rds_file)
@@ -234,7 +256,11 @@ archive_data <- function(limit = 100) {
     rds_file <- file.path(getOption('zeitgebeR')$darksky_storage_path, 'weather.rds')
     zip_file <- file.path(getOption('zeitgebeR')$darksky_storage_path, 'archive.zip')
 
-    weather <- dplyr::bind_rows(purrr::map(files, parse_weather))
+    weather <- dplyr::bind_rows(purrr::map(files, function(path) {
+        y <- suppressWarnings(yaml::yaml.load_file(path))
+        y <- parse_weather(y)
+        return(y)
+    }))
 
     if (file.exists(rds_file)) {
         archive <- readRDS(rds_file)
@@ -253,22 +279,22 @@ archive_data <- function(limit = 100) {
     return(invisible(TRUE))
 }
 
-#' @rdname training_data
+#' Prepare training data
+#'
+#' This function combines historical observations of Hue state and weather
+#' conditions into a \code{\link[dplyr]{data_frame}} formatted for model
+#' fitting.
+#'
+#' @param state \code{\link[dplyr]{data_frame}} of Hue state observations,
+#'   typically created by \code{\link{archive_data}}
+#' @param weather \code{\link[dplyr]{data_frame}} of weather observations,
+#'   typically created by \code{\link{archive_data}}
+#'
+#' @return Returns a \code{\link[dplyr]{data_frame}} ready for a call to
+#'   \code{\link{fit_models}}
+#'
 #' @export
-training_data <- function() {
-
-    # Load source data
-    state_path <- file.path(getOption('zeitgebeR')$hue_storage_path, 'state.rds')
-    weather_path <- file.path(getOption('zeitgebeR')$darksky_storage_path, 'weather.rds')
-
-    if (!file.exists(state_path) | !file.exists(weather_path)) {
-        stop('Create training data with `record_data()`, then call `archive_data()`')
-    }
-
-    state <- readRDS(state_path)
-    weather <- readRDS(weather_path)
-
-    rm(state_path, weather_path)
+training_data <- function(state, weather) {
 
     # Initialize return dataset
     y <- state
@@ -308,8 +334,8 @@ training_data <- function() {
     y <- dplyr::ungroup(y)
     y <- y[stats::complete.cases(y), ]
     y$default_scene <- as.logical(y$default_scene)
-    y$bri[y$bri < 1] <- 1; y$bri[y$bri > 254] <- 254
-    y$ct[y$ct < 153] <- 153; y$ct[y$ct > 500] <- 500
+    y$bri <- unscale_bri(scale_bri(y$bri))
+    y$ct <- unscale_ct(scale_ct(y$ct))
 
     # Add zeitgeber and weather features
     z <- zeitgeber(unique(y$datetime))
@@ -341,7 +367,7 @@ training_data <- function() {
         (0.5 ^ (as.numeric(difftime(max(y$datetime), y$datetime, units = 'days')) / (4 * 365.2422))) *
 
         # Further decay observations that match default scene (half-life: 4 weeks)
-        (0.5 ^ (y$default_scene * as.numeric(difftime(Sys.time(), y$datetime, units = 'weeks')) / (5))) *
+        (0.5 ^ (y$default_scene * as.numeric(difftime(Sys.time(), y$datetime, units = 'weeks')) / (4))) *
 
         # Further decay sustained observations (half-life: 30 minutes)
         (0.5 ^ (y$time_in_state / (30)))
