@@ -46,6 +46,23 @@ fit_models <- function(dta = training_data()) {
     return(list(bri = bri, ct = ct))
 }
 
+#' Predict the ideal state
+#'
+#' @param models the list of models to predict from, like those returned by
+#'   \code{\link{fit_models}}
+#' @param state the current Hue state, as returned by
+#'   \code{\link{parse_hue_state}}
+#' @param weather current weather, as returned by \code{\link{parse_weather}}
+#'
+#' @return Returns a \code{\link[dplyr]{data_frame}} of light information
+#'   including \code{bri} and \code{ct} values predicted from the supplied
+#'   models.
+#'
+#' @export
+predict_from_models <- function(models, state, weather) {
+
+}
+
 #' Scale and unscale brightness and color temperature
 #'
 #' The quasibinomial models created by \code{\link{fit_models}} produce
