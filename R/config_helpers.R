@@ -1,19 +1,24 @@
 
 #' Configure Environment
 #'
-#' These functions are used primarily for their side effects -- specifically to
-#' set (or reset) secrets and other configuration details.
+#' These functions are used specifically for their side effects -- namely to
+#' set (or reset) authentication secrets and configuration details stored in
+#' \code{options()}.
 #'
 #' @param hue_bridge_ip the IP address of your Hue Bridge
 #' @param hue_username the username with access to your Hue Bridge
 #' @param darksky_key Dark Sky secret key
-#' @param lat latitude
-#' @param lon longitude
+#' @param lat latitude (in decimal degrees). Positive north; negative south.
+#' @param lon longitude (in decimal degrees). Positive east; negative west.
 #' @param hue_storage_path path to directory where Hue training data are stored
 #' @param darksky_storage_path path to directory where Dark Sky weather data are
 #'   stored
 #'
-#' @return Returns \code{TRUE} (invisibly) if configuration was set succesfully.
+#' @return Returns \code{TRUE} (invisibly) if options were successfully set or
+#'   reset.
+#'
+#' @seealso \code{\link[PhilipsHue]{set_bridge_credentials}}
+#' @seealso \code{\link[DarkSky]{set_dark_sky_credentials}}
 #'
 #' @export
 set_configuration <- function(

@@ -1,6 +1,11 @@
 
 #' Fit Brightness and Color Temperature Models
 #'
+#' After recording data and preparing a dataset with \code{\link{training_data}},
+#' the \code{fit_models} function will fit two generalized linear models: one
+#' to predict brightness for the given features, and the other to predict color
+#' temperature.
+#'
 #' @param dta training dataset, like that returned by
 #'   \code{\link{training_data}}
 #'
