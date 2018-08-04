@@ -23,7 +23,7 @@
 #' @export
 set_configuration <- function(
     hue_bridge_ip, hue_username, darksky_key, lat, lon,
-    hue_storage_path, darksky_storage_path
+    hue_storage_path = 'data/state', darksky_storage_path = 'data/weather'
 ) {
     if (length(hue_storage_path) != 1L || !is.character(hue_storage_path)) {
         stop('Please specify `hue_storage_path` as a single character value')
