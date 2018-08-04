@@ -2,13 +2,29 @@
 % Please edit documentation in R/fit_models.R
 \name{fit_models}
 \alias{fit_models}
+\alias{scale_bri}
+\alias{unscale_bri}
+\alias{scale_ct}
+\alias{unscale_ct}
 \title{Fit Brightness and Color Temperature Models}
 \usage{
 fit_models(dta = training_data())
+
+scale_bri(bri)
+
+unscale_bri(bri)
+
+scale_ct(ct)
+
+unscale_ct(ct)
 }
 \arguments{
 \item{dta}{training dataset, like that returned by
 \code{\link{training_data}}}
+
+\item{bri}{the brightness value to scale or unscale}
+
+\item{ct}{the color temperature value to scale or unscale}
 }
 \value{
 Returns a named list with two models, one for brightness and one for
@@ -19,4 +35,10 @@ After recording data and preparing a dataset with \code{\link{training_data}},
 the \code{fit_models} function will fit two generalized linear models: one
 to predict brightness for the given features, and the other to predict color
 temperature.
+}
+\details{
+Note that quasibinomial models produce estimates in the range [0, 1], but
+brightness and color temperature are in the ranges [1, 254] and [153, 500],
+respectively. Scale/unscale functions are provided to help convert to and
+from the model scale.
 }
