@@ -6,7 +6,7 @@
 \title{Configure Environment}
 \usage{
 set_configuration(hue_bridge_ip, hue_username, darksky_key, lat, lon,
-  hue_storage_path, darksky_storage_path)
+  hue_storage_path = "data/state", darksky_storage_path = "data/weather")
 
 reset_configuration()
 }
