@@ -55,16 +55,36 @@ fit_models <- function(dta = training_data()) {
 
 #' @rdname fit_models
 #' @export
-scale_bri <- function(bri) {(bri - 1) / (254 - 1)}
+scale_bri <- function(bri) {
+    y <- (bri - 1) / (254 - 1)
+    y[(y < 0) %in% TRUE] <- 0
+    y[(y > 1) %in% TRUE] <- 1
+    return(y)
+}
 
 #' @rdname fit_models
 #' @export
-unscale_bri <- function(bri) {bri * (254 - 1) + 1}
+unscale_bri <- function(bri) {
+    y <- bri * (254 - 1) + 1
+    y[(y < 1) %in% TRUE] <- 1
+    y[(y > 254) %in% TRUE] <- 254
+    return(y)
+}
 
 #' @rdname fit_models
 #' @export
-scale_ct <- function(ct) {(ct - 153) / (500 - 153)}
+scale_ct <- function(ct) {
+    y <- (ct - 153) / (500 - 153)
+    y[(y < 0) %in% TRUE] <- 0
+    y[(y > 1) %in% TRUE] <- 1
+    return(y)
+}
 
 #' @rdname fit_models
 #' @export
-unscale_ct <- function(ct) {ct * (500 - 153) + 153}
+unscale_ct <- function(ct) {
+    y <- ct * (500 - 153) + 153
+    y[(y < 153) %in% TRUE] <- 153
+    y[(y > 500) %in% TRUE] <- 500
+    return(y)
+}
