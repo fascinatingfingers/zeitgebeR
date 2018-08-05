@@ -61,6 +61,45 @@ fit_models <- function(dta = training_data()) {
 #' @export
 predict_from_models <- function(models, state, weather) {
 
+    # Initialize return dataset
+    re <- '^(.+)/(Ambient|Accent|Task)/(.+)$'
+    y <- dplyr::data_frame(
+        datetime = unique(weather$datetime),
+        room = factor(
+            sub(re, '\\1', state$light_name),
+            levels = levels(models$bri$data$room)
+        ),
+        role = factor(
+            sub(re, '\\2', state$light_name),
+            levels = levels(models$bri$data$role)
+        ),
+        group = factor(
+            sub(' ?\\d+', '', sub(re, '\\3', state$light_name)),
+            levels = levels(models$bri$data$group)
+        )
+    )
+    rm(re)
+
+    # Add zeitgeber and weather features
+    y <- dplyr::right_join(
+        dplyr::bind_cols(
+            zeitgeber(unique(y$datetime)),
+            weather[, c('visibility', 'cloud_cover')]
+        ),
+        y,
+        by = 'datetime'
+    )
+
+    # Add bri & ct predictions
+    y$bri <- as.numeric(suppressWarnings(
+        stats::predict(models$bri, type = 'response', newdata = y)
+    ))
+    y$ct <- as.numeric(suppressWarnings(
+        stats::predict(models$ct, type = 'response', newdata = y)
+    ))
+
+    # Fin
+    return(y)
 }
 
 #' Scale and unscale brightness and color temperature
