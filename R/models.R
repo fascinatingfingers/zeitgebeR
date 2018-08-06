@@ -76,7 +76,12 @@ predict_from_models <- function(models, state, weather) {
         group = factor(
             sub(' ?\\d+', '', sub(re, '\\3', state$light_name)),
             levels = levels(models$bri$data$group)
-        )
+        ),
+        light_name = factor(
+            state$light_name,
+            levels = levels(models$bri$data$name)
+        ),
+        light_id = state$light_id
     )
     rm(re)
 
