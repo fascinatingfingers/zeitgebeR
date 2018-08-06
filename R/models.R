@@ -103,6 +103,10 @@ predict_from_models <- function(models, state, weather) {
         stats::predict(models$ct, type = 'response', newdata = y)
     ))
 
+    # Unscale
+    y$bri <- unscale_bri(y$bri)
+    y$ct <- unscale_ct(y$ct)
+
     # Fin
     return(y)
 }
