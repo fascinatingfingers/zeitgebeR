@@ -139,6 +139,7 @@ scale_bri <- function(bri) {
 #' @export
 unscale_bri <- function(bri) {
     y <- bri * (254 - 1) + 1
+    y <- round(y)
     y[(y < 1) %in% TRUE] <- 1
     y[(y > 254) %in% TRUE] <- 254
     return(y)
@@ -148,6 +149,7 @@ unscale_bri <- function(bri) {
 #' @export
 scale_ct <- function(ct) {
     y <- (ct - 153) / (500 - 153)
+    y <- round(y)
     y[(y < 0) %in% TRUE] <- 0
     y[(y > 1) %in% TRUE] <- 1
     return(y)
