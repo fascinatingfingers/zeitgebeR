@@ -372,7 +372,6 @@ training_data <- function(state, weather) {
         # Further decay sustained observations (half-life: 30 minutes)
         (0.5 ^ (y$time_in_state / (30)))
     )
-    y <- y[, setdiff(names(y), c('default_scene', 'time_in_state'))]
 
     # Fin!
     return(y)
