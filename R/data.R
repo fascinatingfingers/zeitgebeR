@@ -363,14 +363,17 @@ training_data <- function(state, weather) {
     # Weight observations
     y$weight <- (
 
+        # Downweight observations that match default scene to 20% of total
+        ifelse(y$default_scene, 0.2 * sum(!y$default_scene) / 0.8 / sum(y$default_scene), 1) *
+
         # Decay all observations (half-life: 4 years)
         (0.5 ^ (as.numeric(difftime(max(y$datetime), y$datetime, units = 'days')) / (4 * 365.2422))) *
 
         # Further decay observations that match default scene (half-life: 4 weeks)
         (0.5 ^ (y$default_scene * as.numeric(difftime(Sys.time(), y$datetime, units = 'weeks')) / (4))) *
 
-        # Further decay sustained observations (half-life: 30 minutes)
-        (0.5 ^ (y$time_in_state / (30)))
+        # Further decay sustained observations (half-life: 5 minutes)
+        (0.5 ^ (y$time_in_state / (5)))
     )
 
     # Fin!
