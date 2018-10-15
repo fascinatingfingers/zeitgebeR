@@ -376,6 +376,21 @@ training_data <- function(state, weather) {
         (0.5 ^ (y$time_in_state / (5)))
     )
 
+    # Zero-out weight for outliers, as determined by Cook's distance
+    bri_m <- stats::lm(bri ~ room*role + group, data = y, weight = y$weight)
+    bri_cooks <- stats::cooks.distance(bri_m)
+    bri_outlier <- bri_cooks > (4 * mean(bri_cooks))
+
+    ct_m <- stats::lm(ct ~ room*role + group, data = y, weight = y$weight)
+    ct_cooks <- stats::cooks.distance(ct_m)
+    ct_outlier <- ct_cooks > (4 * mean(ct_cooks))
+
+    outlier <- (bri_outlier %in% TRUE) | (ct_outlier %in% TRUE)
+
+    y$weight <- y$weight * !outlier
+
+    rm(bri_m, bri_cooks, bri_outlier, ct_m, ct_cooks, ct_outlier, outlier)
+
     # Fin!
     return(y)
 }
