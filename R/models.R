@@ -14,6 +14,10 @@
 #'
 #' @export
 fit_models <- function(dta = training_data()) {
+    dta <- dplyr::group_by_at(dta, setdiff(names(dta), c('name', 'bri', 'ct', 'weight')))
+    dta <- dplyr::summarise_if(is.numeric, mean)
+    dta <- dplyr::ungroup(dta)
+
     dta$bri <- scale_bri(dta$bri)
     dta$ct <- scale_ct(dta$ct)
 
