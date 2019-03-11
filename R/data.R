@@ -4,12 +4,12 @@
 #' @param cache_timeout time (in minutes) to reuse cached results before hitting
 #'   the API again
 #' @param x the object to parse, i.e.
-#'   `\code{x = yaml::yaml.load_file(path)}`) where \code{path} is a data file
-#'   saved by \code{\link{record_hue_state}} or \code{\link{record_weather}}
+#'   ``x = yaml::yaml.load_file(path)``) where `path` is a data file
+#'   saved by [record_hue_state()] or [record_weather()]
 #'
-#' @return \code{\link{record_hue_state}} and \code{\link{record_weather}}
-#'   return \code{TRUE} (invisibly) upon success. \code{\link{parse_hue_state}}
-#'   and \code{\link{parse_weather}} return a \code{\link[dplyr]{data_frame}}
+#' @return [record_hue_state()] and [record_weather()]
+#'   return `TRUE` (invisibly) upon success. [parse_hue_state()]
+#'   and [parse_weather()] return a [dplyr::data_frame()]
 #'   of relevant features.
 #'
 #' @name source_data
@@ -196,15 +196,15 @@ parse_weather <- function(x) {
 #' Batch process source data
 #'
 #' This function identifies new source data files saved in
-#' \code{getOption('zeitgebeR')$hue_storage_path} and
-#' \code{getOption('zeitgebeR')$darksky_storage_path}. Each file is loaded and
+#' `getOption('zeitgebeR')$hue_storage_path` and
+#' `getOption('zeitgebeR')$darksky_storage_path`. Each file is loaded and
 #' parsed, and the data are appended to an RDS file. It then moves the processed
 #' source files into a zip archive. Upon completion, the storage paths should
 #' contain only an RDS file and a zip archive.
 #'
 #' @param limit sets a cap on the number of files to be processed at a time
 #'
-#' @return Returns \code{TRUE} (invisibly) upon successful completion
+#' @return Returns `TRUE` (invisibly) upon successful completion
 #'
 #' @export
 archive_data <- function(limit = 100) {
@@ -282,16 +282,16 @@ archive_data <- function(limit = 100) {
 #' Prepare training data
 #'
 #' This function combines historical observations of Hue state and weather
-#' conditions into a \code{\link[dplyr]{data_frame}} formatted for model
+#' conditions into a [dplyr::data_frame()] formatted for model
 #' fitting.
 #'
-#' @param state \code{\link[dplyr]{data_frame}} of Hue state observations,
-#'   typically created by \code{\link{archive_data}}
-#' @param weather \code{\link[dplyr]{data_frame}} of weather observations,
-#'   typically created by \code{\link{archive_data}}
+#' @param state [dplyr::data_frame()] of Hue state observations,
+#'   typically created by [archive_data()]
+#' @param weather [dplyr::data_frame()] of weather observations,
+#'   typically created by [archive_data()]
 #'
-#' @return Returns a \code{\link[dplyr]{data_frame}} ready for a call to
-#'   \code{\link{fit_models}}
+#' @return Returns a [dplyr::data_frame()] ready for a call to
+#'   [fit_models()]
 #'
 #' @export
 training_data <- function(state, weather) {

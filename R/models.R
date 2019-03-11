@@ -1,13 +1,13 @@
 
 #' Fit Brightness and Color Temperature Models
 #'
-#' After recording data and preparing a dataset with \code{\link{training_data}},
-#' the \code{fit_models} function will fit two generalized linear models: one
+#' After recording data and preparing a dataset with [training_data()],
+#' the `fit_models` function will fit two generalized linear models: one
 #' to predict brightness for the given features, and the other to predict color
 #' temperature.
 #'
 #' @param dta training dataset, like that returned by
-#'   \code{\link{training_data}}
+#'   [training_data()]
 #'
 #' @return Returns a named list with two models, one for brightness and one for
 #'   color temperature.
@@ -53,13 +53,13 @@ fit_models <- function(dta = training_data()) {
 #' Predict the ideal state
 #'
 #' @param models the list of models to predict from, like those returned by
-#'   \code{\link{fit_models}}
+#'   [fit_models()]
 #' @param state the current Hue state, as returned by
-#'   \code{\link{parse_hue_state}}
-#' @param weather current weather, as returned by \code{\link{parse_weather}}
+#'   [parse_hue_state()]
+#' @param weather current weather, as returned by [parse_weather()]
 #'
-#' @return Returns a \code{\link[dplyr]{data_frame}} of light information
-#'   including \code{bri} and \code{ct} values predicted from the supplied
+#' @return Returns a [dplyr::data_frame()] of light information
+#'   including `bri` and `ct` values predicted from the supplied
 #'   models.
 #'
 #' @export
@@ -117,7 +117,7 @@ predict_from_models <- function(models, state, weather) {
 
 #' Scale and unscale brightness and color temperature
 #'
-#' The quasibinomial models created by \code{\link{fit_models}} produce
+#' The quasibinomial models created by [fit_models()] produce
 #' estimates in the range [0, 1], but brightness and color temperature are in
 #' the ranges [1, 254] and [153, 500], respectively. The following functions are
 #' provided to help convert to and from the model scale.

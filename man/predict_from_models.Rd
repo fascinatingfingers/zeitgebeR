@@ -8,17 +8,17 @@ predict_from_models(models, state, weather)
 }
 \arguments{
 \item{models}{the list of models to predict from, like those returned by
-\code{\link{fit_models}}}
+\code{\link[=fit_models]{fit_models()}}}
 
 \item{state}{the current Hue state, as returned by
-\code{\link{parse_hue_state}}}
+\code{\link[=parse_hue_state]{parse_hue_state()}}}
 
-\item{weather}{current weather, as returned by \code{\link{parse_weather}}}
+\item{weather}{current weather, as returned by \code{\link[=parse_weather]{parse_weather()}}}
 }
 \value{
-Returns a \code{\link[dplyr]{data_frame}} of light information
-  including \code{bri} and \code{ct} values predicted from the supplied
-  models.
+Returns a \code{\link[dplyr:data_frame]{dplyr::data_frame()}} of light information
+including \code{bri} and \code{ct} values predicted from the supplied
+models.
 }
 \description{
 Predict the ideal state

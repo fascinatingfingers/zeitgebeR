@@ -22,12 +22,12 @@ unscale_ct(ct)
 \item{ct}{the color temperature value to scale or unscale}
 }
 \value{
-Returns scaled (i.e. [0, 1]) values or unscaled (brightness in
-  [1, 254]; color temperature in [153, 500]) values.
+Returns scaled (i.e. \link{0, 1}) values or unscaled (brightness in
+\link{1, 254}; color temperature in \link{153, 500}) values.
 }
 \description{
-The quasibinomial models created by \code{\link{fit_models}} produce
-estimates in the range [0, 1], but brightness and color temperature are in
-the ranges [1, 254] and [153, 500], respectively. The following functions are
+The quasibinomial models created by \code{\link[=fit_models]{fit_models()}} produce
+estimates in the range \link{0, 1}, but brightness and color temperature are in
+the ranges \link{1, 254} and \link{153, 500}, respectively. The following functions are
 provided to help convert to and from the model scale.
 }

@@ -8,14 +8,14 @@ fit_models(dta = training_data())
 }
 \arguments{
 \item{dta}{training dataset, like that returned by
-\code{\link{training_data}}}
+\code{\link[=training_data]{training_data()}}}
 }
 \value{
 Returns a named list with two models, one for brightness and one for
-  color temperature.
+color temperature.
 }
 \description{
-After recording data and preparing a dataset with \code{\link{training_data}},
+After recording data and preparing a dataset with \code{\link[=training_data]{training_data()}},
 the \code{fit_models} function will fit two generalized linear models: one
 to predict brightness for the given features, and the other to predict color
 temperature.

@@ -21,14 +21,14 @@ parse_weather(x)
 the API again}
 
 \item{x}{the object to parse, i.e.
-`\code{x = yaml::yaml.load_file(path)}`) where \code{path} is a data file
-saved by \code{\link{record_hue_state}} or \code{\link{record_weather}}}
+\code{x = yaml::yaml.load_file(path)}) where \code{path} is a data file
+saved by \code{\link[=record_hue_state]{record_hue_state()}} or \code{\link[=record_weather]{record_weather()}}}
 }
 \value{
-\code{\link{record_hue_state}} and \code{\link{record_weather}}
-  return \code{TRUE} (invisibly) upon success. \code{\link{parse_hue_state}}
-  and \code{\link{parse_weather}} return a \code{\link[dplyr]{data_frame}}
-  of relevant features.
+\code{\link[=record_hue_state]{record_hue_state()}} and \code{\link[=record_weather]{record_weather()}}
+return \code{TRUE} (invisibly) upon success. \code{\link[=parse_hue_state]{parse_hue_state()}}
+and \code{\link[=parse_weather]{parse_weather()}} return a \code{\link[dplyr:data_frame]{dplyr::data_frame()}}
+of relevant features.
 }
 \description{
 Functions to record and parse source data
