@@ -2,7 +2,7 @@ Type: Package
 Package: zeitgebeR
 Title: Machine Learning Enhancements for the Philips Hue Lighting System
 Version: 0.1.0
-Author: person('Justin', 'Brantley', email = 'fascinatingfingers@icloud.com', role = c('aut', 'cre'))
+Authors@R: person('Justin', 'Brantley', email = 'fascinatingfingers@icloud.com', role = c('aut', 'cre'))
 Description: This package contains functions to support a machine learning
   pipeline for your Philips Hue lighting system that continuously adjusts the
   lighting to match the time of day, current weather conditions, and learned
