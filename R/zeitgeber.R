@@ -20,8 +20,8 @@
 #'     \item `datetime`
 #'     \item `solar_elevation` (in degrees)
 #'     \item `solar_azimuth` (in degrees)
-#'     \item `solar_azimuth_x` east--west movement, scaled [-1, 1]
-#'     \item `solar_azimuth_y` north--south movement, scaled [-1, 1]
+#'     \item `solar_azimuth_x` east--west movement, scaled \[-1, 1\]
+#'     \item `solar_azimuth_y` north--south movement, scaled \[-1, 1\]
 #'     \item `civil_daylight` `TRUE` when the solar elevation is
 #'       greater than -6°
 #'     \item `nautical_daylight` `TRUE` when the solar elevation is
