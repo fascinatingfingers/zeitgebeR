@@ -1,16 +1,22 @@
 Type: Package
 Package: zeitgebeR
-Title: Machine Learning Enhancements for the Philips Hue Lighting System
+Title: Machine Learning Enhancements for the Philips Hue
+    Lighting System
 Version: 0.1.0
-Authors@R: person('Justin', 'Brantley', email = 'fascinatingfingers@icloud.com', role = c('aut', 'cre'))
-Description: This package contains functions to support a machine learning
-  pipeline for your Philips Hue lighting system that continuously adjusts the
-  lighting to match the time of day, current weather conditions, and learned
-  preferences. See the README at
-  <https://github.com/fascinatingfingers/zeitgebeR/README.md>.
+Authors@R: 
+    person(given = "Justin",
+           family = "Brantley",
+           role = c("aut", "cre"),
+           email = "fascinatingfingers@icloud.com")
+Description: This package contains functions to support a
+    machine learning pipeline for your Philips Hue lighting system that
+    continuously adjusts the lighting to match the time of day, current
+    weather conditions, and learned preferences. See the README at
+    <https://github.com/fascinatingfingers/zeitgebeR/README.md>.
 License: GPL-3
 URL: https://gitlab.com/fascinatingfingers/zeitgeber
-BugReports: https://gitlab.com/fascinatingfingers/zeitgeber/issues
+BugReports: 
+    https://gitlab.com/fascinatingfingers/zeitgeber/issues
 Imports: 
     DarkSky,
     digest,
@@ -22,6 +28,7 @@ Imports:
     yaml
 Suggests: 
     testthat
+Encoding: UTF-8
 LazyData: TRUE
 Roxygen: list(markdown = TRUE)
-RoxygenNote: 6.0.1
+RoxygenNote: 6.1.1
