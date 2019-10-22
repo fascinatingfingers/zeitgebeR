@@ -7,18 +7,18 @@
 training_data(state, weather)
 }
 \arguments{
-\item{state}{\code{\link[dplyr]{data_frame}} of Hue state observations,
-typically created by \code{\link{archive_data}}}
+\item{state}{\code{\link[dplyr:data_frame]{dplyr::data_frame()}} of Hue state observations,
+typically created by \code{\link[=archive_data]{archive_data()}}}
 
-\item{weather}{\code{\link[dplyr]{data_frame}} of weather observations,
-typically created by \code{\link{archive_data}}}
+\item{weather}{\code{\link[dplyr:data_frame]{dplyr::data_frame()}} of weather observations,
+typically created by \code{\link[=archive_data]{archive_data()}}}
 }
 \value{
-Returns a \code{\link[dplyr]{data_frame}} ready for a call to
-  \code{\link{fit_models}}
+Returns a \code{\link[dplyr:data_frame]{dplyr::data_frame()}} ready for a call to
+\code{\link[=fit_models]{fit_models()}}
 }
 \description{
 This function combines historical observations of Hue state and weather
-conditions into a \code{\link[dplyr]{data_frame}} formatted for model
+conditions into a \code{\link[dplyr:data_frame]{dplyr::data_frame()}} formatted for model
 fitting.
 }

@@ -6,7 +6,8 @@
 \title{Configure Environment}
 \usage{
 set_configuration(hue_bridge_ip, hue_username, darksky_key, lat, lon,
-  hue_storage_path = "data/state", darksky_storage_path = "data/weather")
+  hue_storage_path = "data/state",
+  darksky_storage_path = "data/weather")
 
 reset_configuration()
 }
@@ -28,7 +29,7 @@ stored}
 }
 \value{
 Returns \code{TRUE} (invisibly) if options were successfully set or
-  reset.
+reset.
 }
 \description{
 These functions are used specifically for their side effects -- namely to
@@ -36,7 +37,7 @@ set (or reset) authentication secrets and configuration details stored in
 \code{options()}.
 }
 \seealso{
-\code{\link[PhilipsHue]{set_bridge_credentials}}
+\code{\link[PhilipsHue:set_bridge_credentials]{PhilipsHue::set_bridge_credentials()}}
 
-\code{\link[DarkSky]{set_dark_sky_credentials}}
+\code{\link[DarkSky:set_dark_sky_credentials]{DarkSky::set_dark_sky_credentials()}}
 }

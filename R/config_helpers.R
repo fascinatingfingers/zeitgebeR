@@ -3,7 +3,7 @@
 #'
 #' These functions are used specifically for their side effects -- namely to
 #' set (or reset) authentication secrets and configuration details stored in
-#' \code{options()}.
+#' `options()`.
 #'
 #' @param hue_bridge_ip the IP address of your Hue Bridge
 #' @param hue_username the username with access to your Hue Bridge
@@ -14,11 +14,11 @@
 #' @param darksky_storage_path path to directory where Dark Sky weather data are
 #'   stored
 #'
-#' @return Returns \code{TRUE} (invisibly) if options were successfully set or
+#' @return Returns `TRUE` (invisibly) if options were successfully set or
 #'   reset.
 #'
-#' @seealso \code{\link[PhilipsHue]{set_bridge_credentials}}
-#' @seealso \code{\link[DarkSky]{set_dark_sky_credentials}}
+#' @seealso [PhilipsHue::set_bridge_credentials()]
+#' @seealso [DarkSky::set_dark_sky_credentials()]
 #'
 #' @export
 set_configuration <- function(
