@@ -119,7 +119,7 @@ predict_from_models <- function(models, state, weather) {
 #'
 #' The quasibinomial models created by [fit_models()] produce
 #' estimates in the range \[0, 1\], but brightness and color temperature are in
-#' the ranges \[1, 254\] and [153, 500], respectively. The following functions
+#' the ranges \[1, 254\] and \[153, 500\], respectively. The following functions
 #' are provided to help convert to and from the model scale.
 #'
 #' @param bri the brightness value to scale or unscale

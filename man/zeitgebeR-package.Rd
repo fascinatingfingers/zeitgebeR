@@ -4,13 +4,14 @@
 \name{zeitgebeR-package}
 \alias{zeitgebeR}
 \alias{zeitgebeR-package}
-\title{zeitgebeR: Machine Learning Enhancements for the Philips Hue Lighting System}
+\title{zeitgebeR: Machine Learning Enhancements for the Philips Hue
+    Lighting System}
 \description{
-This package contains functions to support a machine learning
-pipeline for your Philips Hue lighting system that continuously adjusts the
-lighting to match the time of day, current weather conditions, and learned
-preferences. See the README at
-<https://github.com/fascinatingfingers/zeitgebeR/README.md>.
+This package contains functions to support a
+    machine learning pipeline for your Philips Hue lighting system that
+    continuously adjusts the lighting to match the time of day, current
+    weather conditions, and learned preferences. See the README at
+    <https://github.com/fascinatingfingers/zeitgebeR/README.md>.
 }
 \seealso{
 Useful links:

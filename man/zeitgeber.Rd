@@ -32,9 +32,6 @@ is greater than -18°
 \item \code{working_hours} \code{TRUE} from 9a--5p; 10a--6p on weekends
 \item \code{awake_hours} \code{TRUE} from 8a--12a; 9a--1a on weekends
 }
-
-[-1, 1]: R:-1,%201%5C
-[-1, 1]: R:-1,%201%5C
 }
 \description{
 Zeitgeber, Geman for \emph{time-giver}, are external cues that help
