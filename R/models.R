@@ -15,7 +15,7 @@
 #' @export
 fit_models <- function(dta = training_data()) {
     dta <- dplyr::group_by_at(dta, setdiff(names(dta), c('name', 'bri', 'ct', 'weight')))
-    dta <- dplyr::mutate(dta, weight = weight / dplyr::n())
+    dta$weight <- dta$weight / nrow(dta)
     dta <- dplyr::ungroup(dta)
 
     dta$bri <- scale_bri(dta$bri)
